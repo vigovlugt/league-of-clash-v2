@@ -6,16 +6,24 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint"
+        "lint": "next lint",
+        "get-static-data": "esbuild src/scripts/getStaticData.ts --bundle --platform=node --outfile=dist/getStaticData.js --sourcemap --tsconfig=tsconfig.node.json && node dist/getStaticData.js --enable-source-maps"
     },
     "dependencies": {
+        "@reduxjs/toolkit": "^1.7.2",
+        "esbuild": "^0.14.23",
         "next": "12.1.0",
+        "node-fetch": "^3.2.0",
         "react": "17.0.2",
-        "react-dom": "17.0.2"
+        "react-dom": "17.0.2",
+        "react-redux": "^7.2.6",
+        "react-table": "^7.7.0"
     },
     "devDependencies": {
         "@types/node": "17.0.18",
         "@types/react": "17.0.39",
+        "@types/react-redux": "^7.1.22",
+        "@types/react-table": "^7.7.9",
         "autoprefixer": "^10.4.2",
         "eslint": "8.9.0",
         "eslint-config-next": "12.1.0",
