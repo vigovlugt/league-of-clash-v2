@@ -1,11 +1,12 @@
-import { useMemo } from "react";
+import { PropsWithChildren, useMemo } from "react";
 import IPlayerChampionStats from "../../../models/player/IPlayerChampionStats";
 import Table from "../../common/Table";
-import { useTable, Column } from "react-table";
+import { useTable, Column, Row, CellProps } from "react-table";
 import { useAppSelector } from "../../../hooks/store";
 import { selectStaticDataset } from "../../../store/slices/appSlice";
 import formatPercentage from "../../../utils/formatting/percentage";
 import ChampionIcon from "../../common/ChampionIcon";
+import { getWinrateClass } from "../../../utils/style/winrate";
 
 interface IProps {
     championStats: IPlayerChampionStats[];
@@ -45,6 +46,28 @@ const PlayerChampionStats: React.FC<IProps> = ({ championStats }) => {
                 ),
             },
             {
+                id: "winrate",
+                Header: "Winrate",
+                right: true,
+                Cell: ({
+                    row,
+                }: PropsWithChildren<
+                    CellProps<IPlayerChampionStats, number>
+                >) => (
+                    <span
+                        className={getWinrateClass(
+                            row.original.wins,
+                            row.original.games
+                        )}
+                    >
+                        {formatPercentage(
+                            row.original.wins,
+                            row.original.games
+                        )}
+                    </span>
+                ),
+            },
+            {
                 accessor: "games",
                 Header: "Games",
                 right: true,
@@ -53,9 +76,7 @@ const PlayerChampionStats: React.FC<IProps> = ({ championStats }) => {
                 accessor: "performance",
                 Header: "Performance",
                 right: true,
-                Cell: ({ row }) => (
-                    <>{formatPercentage(row.original.performance)}</>
-                ),
+                Cell: ({ row }) => formatPercentage(row.original.performance),
             },
         ],
         []

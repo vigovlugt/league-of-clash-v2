@@ -1,4 +1,7 @@
-import IPlayerData from "../../../models/IPlayerData";
+import IPlayerData from "../../../models/player/IPlayerData";
+import PlayerChampionStat from "./PlayerChampionStat";
+import PlayerChampionStats from "./PlayerChampionStats";
+import PlayerStatsHeader from "./PlayerStatsHeader";
 
 interface IProps {
     playerData: IPlayerData;
@@ -7,10 +10,12 @@ interface IProps {
 const PlayerDataView: React.FC<IProps> = ({ playerData }) => {
     return (
         <div>
-            <h3>
-                {playerData.summonerName} -{" "}
-                {playerData.wins + playerData.losses}
-            </h3>
+            <PlayerStatsHeader playerData={playerData} />
+            <div className="mb-8" />
+            <h2 className="mb-2 font-header text-4xl">Champion stats</h2>
+            <PlayerChampionStats
+                championStats={Object.values(playerData.championStats)}
+            />
         </div>
     );
 };
