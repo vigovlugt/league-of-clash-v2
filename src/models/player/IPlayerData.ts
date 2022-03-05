@@ -4,10 +4,14 @@ import IPlayerChampionStats, {
 import IMatchSummary from "./IMatchSummary";
 import IRankStats from "./IRankScore";
 import IRoleStats, { createRoleStats } from "./IRoleStats";
+import IUggSummonerProfile from "../ugg/IUggSummonerProfile";
 
 export default interface IPlayerData {
     summonerName: string;
+    level: number;
+    iconId: number;
     regionId: string;
+
     rankStats: Record<number, IRankStats>;
 
     wins: number;
@@ -20,8 +24,8 @@ export default interface IPlayerData {
 }
 
 export function createPlayerData(
-    summonerName: string,
     regionId: string,
+    summonerProfile: IUggSummonerProfile,
     matchSummaries: IMatchSummary[],
     rankScores: IRankStats[]
 ): IPlayerData {
@@ -36,7 +40,9 @@ export function createPlayerData(
     }
 
     return {
-        summonerName,
+        summonerName: summonerProfile.summonerName,
+        level: summonerProfile.summonerLevel,
+        iconId: summonerProfile.iconId,
         regionId,
         wins,
         games: matchSummaries.length,

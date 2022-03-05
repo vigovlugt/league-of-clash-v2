@@ -4377,7 +4377,7 @@ function fromUggQueueType(uggString) {
     ranked_solo_5x5: 0 /* RankedSolo */
   }[uggString];
   if (result === void 0) {
-    throw new Error(`QueueType ${uggString} not known`);
+    throw new Error(`QueueType "${uggString}" not known`);
   }
   return result;
 }
@@ -4450,11 +4450,11 @@ function getMeanForWinrate(games) {
   const [a, b, c] = [-0.15294117, 0.21750913, 0.55125215];
   return a * Math.E ** (-b * games) + c;
 }
-function getPerformance(wins, games) {
+function getPerformance(wins, games, isChampionPerformance = true) {
   if (performanceCache.has([wins, games])) {
     return performanceCache.get([wins, games]);
   }
-  const meanWinrateDiff = getMeanForWinrate(games) - 0.5;
+  const meanWinrateDiff = isChampionPerformance ? getMeanForWinrate(games) - 0.5 : 0;
   const performance = gradientDescent((x2) => -getProbability(wins, games, x2), 0.5) + meanWinrateDiff;
   performanceCache.set([wins, games], performance);
   return performance;
@@ -4568,7 +4568,7 @@ function createRoleStats(matchSummaries) {
 }
 
 // src/models/player/IPlayerData.ts
-function createPlayerData(summonerName, regionId, matchSummaries, rankScores) {
+function createPlayerData(regionId, summonerProfile, matchSummaries, rankScores) {
   let wins = 0;
   let losses = 0;
   for (const match of matchSummaries) {
@@ -4579,7 +4579,9 @@ function createPlayerData(summonerName, regionId, matchSummaries, rankScores) {
     }
   }
   return {
-    summonerName,
+    summonerName: summonerProfile.summonerName,
+    level: summonerProfile.summonerLevel,
+    iconId: summonerProfile.iconId,
     regionId,
     wins,
     games: matchSummaries.length,
@@ -4592,8 +4594,9 @@ function createPlayerData(summonerName, regionId, matchSummaries, rankScores) {
 
 // src/models/player/IRankScore.ts
 function fromUggRankScore(ugg) {
+  const queueType = ugg.queueType || "ranked_flex_sr";
   return {
-    queueType: fromUggQueueType(ugg.queueType),
+    queueType: fromUggQueueType(queueType),
     tier: ugg.tier,
     rank: ugg.rank,
     wins: ugg.wins,
@@ -4659,6 +4662,29 @@ var FETCH_PROFILE_RANKS_QUERY = `query FetchProfileRanks(
         }
     }
   }`;
+var GET_SUMMONER_PROFILE = `query getSummonerProfile($regionId: String!, $summonerName: String!) {
+    profileInit(
+      championId: "-1"
+      queueType: "-1"
+      regionId: $regionId
+      role: "7"
+      seasonId: "-1"
+      summonerName: $summonerName
+    ) {
+      playerInfo {
+        accountIdV3
+        accountIdV4
+        exodiaUuid
+        iconId
+        puuidV4
+        regionId
+        summonerIdV3
+        summonerIdV4
+        summonerLevel
+        summonerName
+      }
+    }
+  }`;
 
 // src/api/UggApi.ts
 var BASE_URL = "https://u.gg/api";
@@ -4666,11 +4692,13 @@ var UggApi = class {
   static async getPlayerData(summonerName, regionId, seasonId) {
     const matchSummariesPromise = UggApi.getMatchSummaries(summonerName, regionId, seasonId);
     const playerRanksPromise = UggApi.getPlayerRanks(summonerName, regionId, seasonId);
-    const [matchSummaries, playerRanks] = await Promise.all([
+    const summonerProfilePromise = UggApi.getSummonerProfile(regionId, summonerName);
+    const [matchSummaries, playerRanks, summonerProfile] = await Promise.all([
       matchSummariesPromise,
-      playerRanksPromise
+      playerRanksPromise,
+      summonerProfilePromise
     ]);
-    return createPlayerData(summonerName, regionId, matchSummaries.map((ugg) => fromUggMatchSummary(ugg)), playerRanks.map((ugg) => fromUggRankScore(ugg)));
+    return createPlayerData(regionId, summonerProfile, matchSummaries.map((ugg) => fromUggMatchSummary(ugg)), playerRanks.map((ugg) => fromUggRankScore(ugg)));
   }
   static async getMatchSummaries(summonerName, regionId, seasonId) {
     let matchSummaries = [];
@@ -4727,6 +4755,25 @@ var UggApi = class {
     const json = await res.json();
     const fetchProfileRanks = json.data.fetchProfileRanks;
     return fetchProfileRanks.rankScores;
+  }
+  static async getSummonerProfile(regionId, summonerName) {
+    const body = {
+      query: GET_SUMMONER_PROFILE,
+      variables: {
+        summonerName,
+        regionId
+      }
+    };
+    const res = await fetch(BASE_URL, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: {
+        "content-type": "application/json"
+      }
+    });
+    const json = await res.json();
+    const data = json.data.profileInit;
+    return data.playerInfo;
   }
   static async getUggVersion() {
     const URL2 = "https://static.u.gg/assets/lol/riot_patch_update/prod/ugg/ugg-api-versions.json";
@@ -5995,7 +6042,10 @@ function createStaticDataset(patch, championData, rankingData) {
 
 // src/scripts/getStaticData.ts
 var fs2 = __toESM(require("fs/promises"));
+var import_process = require("process");
 global.fetch = fetch2;
+console.log(binomialPmf(103 / 179 * 100, 100, 0.5));
+(0, import_process.exit)();
 async function main() {
   const version = await UggApi.getUggVersion();
   console.log("Version:", version);

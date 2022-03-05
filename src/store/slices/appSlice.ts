@@ -38,5 +38,5 @@ export const selectEnemyData = (state: RootState) => state.app.enemyData;
 export const selectStaticDataset = (state: RootState) =>
     state.app.staticDataset;
 
-const counterReducer = appSlice.reducer;
-export default counterReducer;
+const appReducer = appSlice.reducer;
+export default appReducer;

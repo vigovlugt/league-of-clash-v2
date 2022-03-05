@@ -15,6 +15,7 @@ export default function gradientDescent(
         }
 
         x -= diff;
+
         iter++;
     }
 

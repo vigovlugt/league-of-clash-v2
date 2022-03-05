@@ -6,7 +6,9 @@ import IUggMatchSummary from "../models/ugg/IUggMatchSummary";
 import {
     FETCH_MATCH_SUMMARIES_QUERY,
     FETCH_PROFILE_RANKS_QUERY,
+    GET_SUMMONER_PROFILE,
     IFetchProfileRanksQueryResponse,
+    IGetSummonerProfileResponse,
     IMatchSummariesQueryResponse,
 } from "./queries";
 
@@ -30,14 +32,21 @@ export default class UggApi {
             seasonId
         );
 
-        const [matchSummaries, playerRanks] = await Promise.all([
-            matchSummariesPromise,
-            playerRanksPromise,
-        ]);
+        const summonerProfilePromise = UggApi.getSummonerProfile(
+            regionId,
+            summonerName
+        );
+
+        const [matchSummaries, playerRanks, summonerProfile] =
+            await Promise.all([
+                matchSummariesPromise,
+                playerRanksPromise,
+                summonerProfilePromise,
+            ]);
 
         return createPlayerData(
-            summonerName,
             regionId,
+            summonerProfile,
             matchSummaries.map((ugg) => fromUggMatchSummary(ugg)),
             playerRanks.map((ugg) => fromUggRankScore(ugg))
         );
@@ -103,6 +112,10 @@ export default class UggApi {
         });
 
         const json = await res.json();
+        if (json.errors?.length) {
+            console.error(json);
+            console.error("Error for '" + summonerName + "'");
+        }
 
         return json.data
             .fetchPlayerMatchSummaries as IMatchSummariesQueryResponse;
@@ -137,6 +150,32 @@ export default class UggApi {
 
         return fetchProfileRanks.rankScores;
     }
+
+    static async getSummonerProfile(regionId: string, summonerName: string) {
+        const body = {
+            query: GET_SUMMONER_PROFILE,
+            variables: {
+                summonerName,
+                regionId,
+            },
+        };
+
+        const res = await fetch(BASE_URL, {
+            method: "POST",
+            body: JSON.stringify(body),
+            headers: {
+                "content-type": "application/json",
+            },
+        });
+
+        const json = await res.json();
+
+        const data = json.data.profileInit as IGetSummonerProfileResponse;
+
+        return data.playerInfo;
+    }
+
+    // STATIC DATA
 
     static async getUggVersion() {
         const URL =

@@ -5,7 +5,7 @@ import { useTable, Column, Row, CellProps } from "react-table";
 import { useAppSelector } from "../../../hooks/store";
 import { selectStaticDataset } from "../../../store/slices/appSlice";
 import formatPercentage from "../../../utils/formatting/percentage";
-import ChampionIcon from "../../common/ChampionIcon";
+import ChampionIcon from "../champion/ChampionIcon";
 import { getWinrateClass } from "../../../utils/style/winrate";
 
 interface IProps {
@@ -78,11 +78,22 @@ const PlayerChampionStats: React.FC<IProps> = ({ championStats }) => {
                 right: true,
                 Cell: ({ row }) => formatPercentage(row.original.performance),
             },
+            {
+                id: "actions",
+                Cell: ({
+                    row,
+                }: PropsWithChildren<
+                    CellProps<IPlayerChampionStats, number>
+                >) => (
+                    <div className="flex justify-end">
+                        <button className="mr-4 text-sky-500">Pick</button>
+                        <button className="text-red-600">Ban</button>
+                    </div>
+                ),
+            },
         ],
         []
     );
-
-    console.log(data);
 
     const table = useTable({ data, columns });
 

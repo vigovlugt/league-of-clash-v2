@@ -1,9 +1,9 @@
-export function getWinrateClass(wins: number, games: number) {
+export function getWinrateClass(wins: number, games?: number) {
     if (games === 0) {
         return "text-winrate-okay";
     }
 
-    const winrate = wins / games;
+    const winrate = games ? wins / games : wins;
 
     if (winrate < 0.45) {
         return "text-winrate-shiggo";

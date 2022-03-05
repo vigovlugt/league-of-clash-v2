@@ -3,7 +3,6 @@ import fetch from "node-fetch";
 import RiotApi from "../api/RiotApi";
 import { createStaticDataset } from "../models/static/IStaticDataset";
 import * as fs from "fs/promises";
-
 (global as any).fetch = fetch;
 
 async function main() {

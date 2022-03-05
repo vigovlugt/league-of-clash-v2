@@ -51,8 +51,8 @@ export function createRoleStat(
     return {
         role,
         wins,
-        games: losses + wins,
-        pickrate: (wins + losses) / totalGames,
+        games: n,
+        pickrate: n / totalGames,
 
         kills,
         assists,
@@ -65,6 +65,8 @@ export function createRoleStat(
 }
 
 export function createRoleStats(matchSummaries: IMatchSummary[]) {
+    const totalGames = matchSummaries.length;
+
     const matchesByRole = new Map<Role, IMatchSummary[]>();
     for (const match of matchSummaries) {
         if (matchesByRole.has(match.role)) {
@@ -76,7 +78,7 @@ export function createRoleStats(matchSummaries: IMatchSummary[]) {
 
     const roleStats: Record<number, IRoleStats> = {};
     for (const [role, matches] of matchesByRole.entries()) {
-        roleStats[role] = createRoleStat(role, matches, matchSummaries.length);
+        roleStats[role] = createRoleStat(role, matches, totalGames);
     }
 
     return roleStats;

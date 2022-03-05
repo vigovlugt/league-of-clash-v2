@@ -22,8 +22,16 @@ export const useAppInit = (staticDataset: IStaticDataset) => {
     useEffect(() => {
         const effect = async () => {
             const query = router.query;
-            const allyTeamNames = query.allyTeam?.toString().split("+") ?? [];
-            const enemyTeamNames = query.enemyTeam?.toString().split("+") ?? [];
+            const allyTeamNames =
+                decodeURIComponent(query.allyTeam?.toString() ?? "").split(
+                    " "
+                ) ?? [];
+
+            const enemyTeamNames =
+                decodeURIComponent(query.enemyTeam?.toString() ?? "").split(
+                    " "
+                ) ?? [];
+
             const regionId = query.regionId?.toString() ?? "euw1";
             const seasonId = parseFloat(query.seasonId?.toString() ?? "18");
 

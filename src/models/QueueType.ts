@@ -10,7 +10,7 @@ export function fromUggQueueType(uggString: string) {
     }[uggString];
 
     if (result === undefined) {
-        throw new Error(`QueueType ${uggString} not known`);
+        throw new Error(`QueueType "${uggString}" not known`);
     }
 
     return result;

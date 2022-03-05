@@ -1,5 +1,5 @@
-import { useAppSelector } from "../../hooks/store";
-import { selectStaticDataset } from "../../store/slices/appSlice";
+import { useAppSelector } from "../../../hooks/store";
+import { selectStaticDataset } from "../../../store/slices/appSlice";
 
 interface IProps {
     championId: number;
@@ -15,7 +15,7 @@ const ChampionIcon: React.FC<IProps> = ({ championId, size }) => {
 
     return (
         <div
-            className="overflow-hidden"
+            className="overflow-hidden rounded-lg"
             style={{ width: `${width}px`, height: `${width}px` }}
         >
             <img

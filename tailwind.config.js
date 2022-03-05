@@ -12,7 +12,6 @@ module.exports = {
                 "light-dark": "#333333",
                 light: "#d6d6d6",
                 gray: colors.neutral,
-                "rank-platinum": "#4E9996",
                 negative: "#DE2F2F",
                 positive: "#20BF55",
                 rank: {

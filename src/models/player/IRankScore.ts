@@ -10,8 +10,10 @@ export default interface IRankStats {
 }
 
 export function fromUggRankScore(ugg: IUggRankScore): IRankStats {
+    const queueType = ugg.queueType || "ranked_flex_sr";
+
     return {
-        queueType: fromUggQueueType(ugg.queueType),
+        queueType: fromUggQueueType(queueType),
         tier: ugg.tier,
         rank: ugg.rank,
         wins: ugg.wins,
